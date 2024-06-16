@@ -13,10 +13,7 @@ class TerimaBarang(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     qty = db.Column(db.Integer, nullable=False)
     id_supplier = db.Column(db.Integer, db.ForeignKey('barang_supplier.id'), nullable=False)
-    
-    # Define relationship to BarangSupplier
     supplier = db.relationship("BarangSupplier", back_populates="pesanan")
-
     def json(self):
         return {
             'id': self.id,
@@ -31,7 +28,6 @@ class BarangSupplier(db.Model):
     harga = db.Column(db.Integer, nullable=False)
     nama_supplier = db.Column(db.String(100), nullable=False)
     
-    # Define relationship to TerimaBarang
     pesanan = db.relationship("TerimaBarang", back_populates="supplier")
 
     def json(self):
@@ -49,21 +45,23 @@ class BarangSupplier(db.Model):
 def home():
     return render_template('/index.html')
 
+
 @app.route('/barang_supplier', methods=['GET'])
 def list_barang():
     barang = BarangSupplier.query.all()
     return render_template('/supplier/display.html', barang=barang)
 
+
 @app.route('/barang_supplier/create', methods=['GET'])
 def create_supplier():
     return render_template('/supplier/create.html')
+
 
 ## Get Semua Barang dalam Tabel
 @app.route('/barang_supplier/update/<int:id>', methods=['GET'])
 def get_all_barang(id):
     barang = BarangSupplier.query.get_or_404(id)
     return render_template('/supplier/update.html', barang=barang)
-
 
 
 @app.route('/barang_supplier/create', methods=['POST'])
@@ -78,6 +76,7 @@ def add_supplier():
     db.session.commit()
     return redirect(url_for('list_barang'))
 
+
 @app.route('/barang_supplier/update/<int:id>', methods=['POST'])
 def update_supplier(id):
     data = request.form
@@ -88,12 +87,14 @@ def update_supplier(id):
     db.session.commit()
     return redirect(url_for('list_barang'))
 
+
 @app.route('/barang_supplier/delete/<int:id>', methods=['POST'])
 def delete_supplier(id):
     barang = BarangSupplier.query.get_or_404(id)
     db.session.delete(barang)
     db.session.commit()
     return redirect(url_for('list_barang'))
+
 
 ### Terima Barang
 @app.route('/terima_barang', methods=['GET'])
@@ -114,23 +115,19 @@ def get_all_pesan(id):
 @app.route('/terima_barang/create', methods=['POST'])
 def add_pesan():
     data = request.form
-    supplier_id = int(data['id_supplier'])  # Assuming id_supplier is passed from the form
-    qty = int(data['qty'])  # Assuming qty is passed from the form
-
-    # Retrieve the BarangSupplier instance based on the supplier_id
+    supplier_id = int(data['id_supplier'])  
+    qty = int(data['qty'])  
     supplier = BarangSupplier.query.get_or_404(supplier_id)
-    
-    # Create a new TerimaBarang instance
     new_pesan = TerimaBarang(
         id_supplier=supplier_id,
         qty=qty
     )
     
-    # Add the new TerimaBarang instance to the session and commit the transaction
+
     db.session.add(new_pesan)
     db.session.commit()
     
-    # Redirect to the list_pesan route
+
     return redirect(url_for('list_pesan'))
 
 
